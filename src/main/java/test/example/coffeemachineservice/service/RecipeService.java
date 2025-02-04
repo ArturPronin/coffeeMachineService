@@ -10,4 +10,6 @@ public interface RecipeService {
     void addRecipe(AddNewRecipeRequestDto requestDto);
 
     List<RecipeResponseDto> getAllRecipes();
+
+    String deleteRecipe(String recipeId);
 }

@@ -39,4 +39,8 @@ public class Drink {
 
     @Column(name = "orders_count", nullable = false)
     private int ordersCount;
+
+    public void incrementOrdersCount() {
+        this.ordersCount++;
+    }
 }

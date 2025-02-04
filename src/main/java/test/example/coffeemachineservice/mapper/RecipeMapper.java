@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import test.example.coffeemachineservice.dto.request.AddNewRecipeRequestDto;
 import test.example.coffeemachineservice.dto.request.RecipeIngredientDto;
 import test.example.coffeemachineservice.dto.response.RecipeResponseDto;
+import test.example.coffeemachineservice.persistent.entity.Ingredient;
 import test.example.coffeemachineservice.persistent.entity.Recipe;
 import test.example.coffeemachineservice.persistent.entity.RecipeIngredient;
 
@@ -15,11 +16,11 @@ public interface RecipeMapper {
     Recipe mapToRecipe(AddNewRecipeRequestDto requestDto);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "ingredient", ignore = true)
     @Mapping(source = "dto.quantityOnRecipe", target = "quantityOnRecipe")
-    RecipeIngredient mapToRecipeIngredient(RecipeIngredientDto dto, Recipe recipe);
+    @Mapping(source = "ingredient", target = "ingredient")
+    RecipeIngredient mapToRecipeIngredient(RecipeIngredientDto dto, Recipe recipe, Ingredient ingredient);
 
-    @Mapping(target = "recipe.recipeIngredients", ignore = true)
+    @Mapping(target = "recipeIngredient", source = "recipeIngredients")
     RecipeResponseDto mapToRecipeResponseDto(Recipe recipe);
 
     @Mapping(source = "ingredient.ingredientName", target = "ingredientName")

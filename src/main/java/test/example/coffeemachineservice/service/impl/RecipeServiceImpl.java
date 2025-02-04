@@ -3,10 +3,8 @@ package test.example.coffeemachineservice.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import test.example.coffeemachineservice.dto.request.AddNewRecipeRequestDto;
-import test.example.coffeemachineservice.dto.request.RecipeIngredientDto;
 import test.example.coffeemachineservice.dto.response.RecipeResponseDto;
 import test.example.coffeemachineservice.exception.RecipeException;
 import test.example.coffeemachineservice.mapper.RecipeMapper;
@@ -19,9 +17,14 @@ import test.example.coffeemachineservice.persistent.repository.RecipeRepository;
 import test.example.coffeemachineservice.service.RecipeService;
 
 import java.util.List;
+import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.INGREDIENT_NOT_FOUND_MESSAGE;
+import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPES_NOT_FOUND_MESSAGE;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPE_ALREADY_EXISTS_MESSAGE;
+import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPE_DELETED_MESSAGE;
+import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPE_ID_NOT_FOUND_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -41,65 +44,39 @@ public class RecipeServiceImpl implements RecipeService {
     public List<RecipeResponseDto> getAllRecipes() {
         List<Recipe> recipes = recipeRepository.findAll();
         if (recipes.isEmpty()) {
-            throw new RecipeException(HttpStatus.NOT_FOUND, "Рецепты не найдены");
+            throw new RecipeException(NOT_FOUND, RECIPES_NOT_FOUND_MESSAGE);
         }
-
         return recipes.stream()
-                .map(this::convertToResponseDto)
+                .map(recipeMapper::mapToRecipeResponseDto)
                 .toList();
     }
 
     @Override
     @Transactional
     public void addRecipe(AddNewRecipeRequestDto requestDto) {
-        validateRecipeNotExists(requestDto.getRecipeName());
-
-        Recipe newRecipe = recipeMapper.mapToRecipe(requestDto);
-        newRecipe = recipeRepository.save(newRecipe);
-
-        List<RecipeIngredient> recipeIngredients = createRecipeIngredients(requestDto, newRecipe);
-        recipeIngredientRepository.saveAll(recipeIngredients);
-
-        newRecipe.setRecipeIngredients(recipeIngredients);
-    }
-
-    private RecipeResponseDto convertToResponseDto(Recipe recipe) {
-        RecipeResponseDto responseDto = recipeMapper.mapToRecipeResponseDto(recipe);
-
-        if (recipe.getRecipeIngredients() != null && !recipe.getRecipeIngredients().isEmpty()) {
-            List<RecipeIngredientDto> ingredients = recipe.getRecipeIngredients().stream()
-                    .filter(ri -> ri.getIngredient() != null)
-                    .map(recipeMapper::mapToRecipeIngredientDto)
-                    .toList();
-            responseDto.setRecipeIngredient(ingredients);
-        } else {
-            responseDto.setRecipeIngredient(List.of());
-        }
-
-        return responseDto;
-    }
-
-    private void validateRecipeNotExists(String recipeName) {
-        if (recipeRepository.findByRecipeName(recipeName).isPresent()) {
+        if (recipeRepository.findByRecipeName(requestDto.getRecipeName()).isPresent()) {
             throw new RecipeException(RECIPE_ALREADY_EXISTS_MESSAGE);
         }
-    }
 
-    private List<RecipeIngredient> createRecipeIngredients(AddNewRecipeRequestDto requestDto, Recipe recipe) {
-        return requestDto.getRecipeIngredients().stream()
-                .map(dto -> createRecipeIngredient(dto, recipe))
+        Recipe newRecipe = recipeMapper.mapToRecipe(requestDto);
+        List<RecipeIngredient> recipeIngredients = requestDto.getRecipeIngredients().stream()
+                .map(dto -> {
+                    Ingredient ingredient = ingredientRepository.findByIngredientName(dto.getIngredientName())
+                            .orElseThrow(() -> new RecipeException(NOT_FOUND, INGREDIENT_NOT_FOUND_MESSAGE));
+                    return recipeMapper.mapToRecipeIngredient(dto, newRecipe, ingredient);
+                })
                 .toList();
+
+        newRecipe.setRecipeIngredients(recipeIngredients);
+        recipeRepository.save(newRecipe);
+        recipeIngredientRepository.saveAll(recipeIngredients);
     }
 
-    private RecipeIngredient createRecipeIngredient(RecipeIngredientDto dto, Recipe recipe) {
-        Ingredient ingredient = findIngredient(dto.getIngredientName());
-        RecipeIngredient recipeIngredient = recipeMapper.mapToRecipeIngredient(dto, recipe);
-        recipeIngredient.setIngredient(ingredient);
-        return recipeIngredient;
-    }
-
-    private Ingredient findIngredient(String ingredientName) {
-        return ingredientRepository.findByIngredientName(ingredientName)
-                .orElseThrow(() -> new RecipeException(HttpStatus.NOT_FOUND, INGREDIENT_NOT_FOUND_MESSAGE));
+    @Override
+    public String deleteRecipe(String recipeId) {
+        Recipe foundRecipe = recipeRepository.findById(UUID.fromString(recipeId))
+                .orElseThrow(() -> new RecipeException(RECIPE_ID_NOT_FOUND_MESSAGE));
+        recipeRepository.delete(foundRecipe);
+        return RECIPE_DELETED_MESSAGE;
     }
 }

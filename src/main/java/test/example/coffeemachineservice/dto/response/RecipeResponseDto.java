@@ -15,12 +15,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "Сущность отображения всех рецептов")
+@Schema(description = "Сущность отображения рецепта")
 public class RecipeResponseDto {
 
+    @Schema(description = "recipeId", example = "1568b827-4f03-4185-b622-64a5b9f46be3")
     private String recipeId;
 
+    @Schema(description = "recipeName", example = "Раф")
     private String recipeName;
 
+    @Schema(description = "recipeIngredient")
     private List<RecipeIngredientDto> recipeIngredient;
 }
