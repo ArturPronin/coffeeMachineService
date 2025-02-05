@@ -12,7 +12,7 @@ git clone https://github.com/ArturPronin/coffeeMachineService.git
 
 3. Перейти в папку с репозиторием:
 ```bash
-cd "<your-path>\coffee-machine-service"
+cd "<your-path>\coffeeMachineService"
 ```
 
 4. **(Опционально):** В папке с проектом есть файл `.env` в котором нужно указать логин и пароль для БД:
@@ -33,7 +33,7 @@ docker-compose up --build
 
 #### или использовать команду для быстрого старта:
 ```bash
-git clone https://github.com/ArturPronin/coffeeMachineService.git && cd coffee-machine-service && echo "DB_USER=postgres\nDB_PASSWORD=postgres" > .env && docker compose up --build
+git clone https://github.com/ArturPronin/coffeeMachineService.git && cd coffeeMachineService && echo "DB_USER=postgres\nDB_PASSWORD=postgres" > .env && docker compose up --build
 ```
 
 ## 2. Инструкция по запуску (maven)
