@@ -14,7 +14,7 @@ public class ApplicationConstant {
 
     public static final String RECIPE_ID_NOT_FOUND_MESSAGE = "Рецепт с указанным ID не найден";
 
-    public static final String RECIPE_DELETED_MESSAGE = "Ингредиент удален";
+    public static final String RECIPE_DELETED_MESSAGE = "Рецепт удален";
 
     public static final String INGREDIENT_SUCCESS_ADD_MESSAGE = "Ингредиент добавлен";
 
@@ -48,9 +48,27 @@ public class ApplicationConstant {
 
     public static final String ORDERS_NOT_FOUND_MESSAGE = "Заказы не найдены";
 
-    public static final String ORDER_NOT_FOUND_MESSAGE = "Заказ с указанным Id не найден";
+    public static final String ORDER_NOT_FOUND_MESSAGE = "Заказ с указанным ID не найден";
+
+    public static final String ORDER_DELETED_MESSAGE = "Заказ удален";
 
     public static final String CAN_ONLY_ONE_ACTIVE_ORDER_MESSAGE = "Может быть только один активный заказ";
 
     public static final int MINUTES_MAKE_DRINK = 2;
+
+    public static final String REGEXP_UUID = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
+    public static final String INCOMING_PARAMETER_MISSING_MESSAGE = "Обязательный входной параметр отсутствует";
+
+    public static final String MUST_BE_GREATER_THAN_OR_EQUAL_ZERO_MESSAGE = "Число должно быть больше или равно 0";
+
+    public static final String MUST_BE_GREATER_THAN_ZERO_MESSAGE = "Число должно быть больше 0";
+
+    public static final String INCORRECT_UUID_FORMAT_MESSAGE = "Неверный формат UUID";
+
+    public static final String NOT_POSSIBLE_DELETE_RECIPE_MESSAGE = "Невозможно удалить рецепт, перед этим необходимо удалить напитки, в которых он используется";
+
+    public static final String NOT_POSSIBLE_DELETE_INGREDIENT_MESSAGE = "Невозможно удалить ингредиент, перед этим необходимо удалить рецепты, в которых он используется";
+
+    public static final String NOT_POSSIBLE_DELETE_DRINKS_MESSAGE = "Невозможно удалить напиток, перед этим необходимо удалить заказы, в которых он присутствует";
 }

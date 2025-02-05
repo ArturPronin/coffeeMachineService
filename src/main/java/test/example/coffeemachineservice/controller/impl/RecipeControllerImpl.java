@@ -1,6 +1,8 @@
 package test.example.coffeemachineservice.controller.impl;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,9 @@ import test.example.coffeemachineservice.service.RecipeService;
 
 import java.util.List;
 
+import static test.example.coffeemachineservice.constant.ApplicationConstant.INCORRECT_UUID_FORMAT_MESSAGE;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPE_SUCCESS_ADD_MESSAGE;
+import static test.example.coffeemachineservice.constant.ApplicationConstant.REGEXP_UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +46,10 @@ public class RecipeControllerImpl implements RecipeController {
 
     @Override
     @DeleteMapping("/delete/{recipeId}")
-    public ResponseEntity<String> deleteRecipe(@PathVariable String recipeId) {
+    public ResponseEntity<String> deleteRecipe(
+            @PathVariable("recipeId")
+            @Schema(description = "recipeId", example = "1568b827-4f03-4185-b622-64a5b9f46be3")
+            @Valid @Pattern(regexp = REGEXP_UUID, message = INCORRECT_UUID_FORMAT_MESSAGE) String recipeId) {
         return ResponseEntity.ok(recipeService.deleteRecipe(recipeId));
     }
 }

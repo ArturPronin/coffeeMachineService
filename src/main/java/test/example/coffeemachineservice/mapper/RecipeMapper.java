@@ -17,7 +17,6 @@ public interface RecipeMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "dto.quantityOnRecipe", target = "quantityOnRecipe")
-    @Mapping(source = "ingredient", target = "ingredient")
     RecipeIngredient mapToRecipeIngredient(RecipeIngredientDto dto, Recipe recipe, Ingredient ingredient);
 
     @Mapping(target = "recipeIngredient", source = "recipeIngredients")

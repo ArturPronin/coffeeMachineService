@@ -1,11 +1,11 @@
 package test.example.coffeemachineservice.service;
 
+import test.example.coffeemachineservice.dto.request.PeriodRequestDto;
 import test.example.coffeemachineservice.dto.response.OrderResponseDto;
 import test.example.coffeemachineservice.persistent.entity.Drink;
 import test.example.coffeemachineservice.persistent.enums.OrderStatus;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,5 +23,7 @@ public interface OrderService {
 
     List<OrderResponseDto> getOrdersForCurrentWeek();
 
-    List<OrderResponseDto> getOrdersForPeriod(LocalDate start, LocalDate end);
+    List<OrderResponseDto> getOrdersForPeriod(PeriodRequestDto requestDto);
+
+    String deleteOrder(String orderId);
 }

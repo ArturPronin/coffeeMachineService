@@ -3,6 +3,7 @@ package test.example.coffeemachineservice.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import test.example.coffeemachineservice.dto.request.AddNewRecipeRequestDto;
 import test.example.coffeemachineservice.dto.response.RecipeResponseDto;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.INGREDIENT_NOT_FOUND_MESSAGE;
+import static test.example.coffeemachineservice.constant.ApplicationConstant.NOT_POSSIBLE_DELETE_RECIPE_MESSAGE;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPES_NOT_FOUND_MESSAGE;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPE_ALREADY_EXISTS_MESSAGE;
 import static test.example.coffeemachineservice.constant.ApplicationConstant.RECIPE_DELETED_MESSAGE;
@@ -42,6 +44,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     @Transactional
     public List<RecipeResponseDto> getAllRecipes() {
+        log.info("Получение всех рецептов");
         List<Recipe> recipes = recipeRepository.findAll();
         if (recipes.isEmpty()) {
             throw new RecipeException(NOT_FOUND, RECIPES_NOT_FOUND_MESSAGE);
@@ -54,10 +57,10 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     @Transactional
     public void addRecipe(AddNewRecipeRequestDto requestDto) {
+        log.info("Добавление нового рецепта: {}", requestDto.getRecipeName());
         if (recipeRepository.findByRecipeName(requestDto.getRecipeName()).isPresent()) {
             throw new RecipeException(RECIPE_ALREADY_EXISTS_MESSAGE);
         }
-
         Recipe newRecipe = recipeMapper.mapToRecipe(requestDto);
         List<RecipeIngredient> recipeIngredients = requestDto.getRecipeIngredients().stream()
                 .map(dto -> {
@@ -70,13 +73,21 @@ public class RecipeServiceImpl implements RecipeService {
         newRecipe.setRecipeIngredients(recipeIngredients);
         recipeRepository.save(newRecipe);
         recipeIngredientRepository.saveAll(recipeIngredients);
+        log.info("Рецепт '{}' успешно добавлен", newRecipe.getRecipeName());
     }
 
     @Override
     public String deleteRecipe(String recipeId) {
+        log.info("Удаление рецепта с ID {}", recipeId);
         Recipe foundRecipe = recipeRepository.findById(UUID.fromString(recipeId))
-                .orElseThrow(() -> new RecipeException(RECIPE_ID_NOT_FOUND_MESSAGE));
-        recipeRepository.delete(foundRecipe);
-        return RECIPE_DELETED_MESSAGE;
+                .orElseThrow(() -> new RecipeException(NOT_FOUND, RECIPE_ID_NOT_FOUND_MESSAGE));
+        try {
+            recipeRepository.delete(foundRecipe);
+            log.info("Рецепт с ID {} успешно удален", recipeId);
+            return RECIPE_DELETED_MESSAGE;
+        } catch (DataIntegrityViolationException exception) {
+            log.error("Ошибка при удалении рецепта с ID {}: {}", recipeId, exception.getMessage());
+            return NOT_POSSIBLE_DELETE_RECIPE_MESSAGE;
+        }
     }
 }

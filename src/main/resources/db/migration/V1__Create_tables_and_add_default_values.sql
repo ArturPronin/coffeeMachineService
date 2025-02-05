@@ -1,3 +1,10 @@
+-- Таблица рецептов
+CREATE TABLE recipes
+(
+    recipe_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipe_name VARCHAR(30) NOT NULL UNIQUE
+);
+
 -- Таблица ингредиентов
 CREATE TABLE ingredients
 (
@@ -7,19 +14,12 @@ CREATE TABLE ingredients
     unit             VARCHAR(10) NOT NULL
 );
 
--- Таблица рецептов
-CREATE TABLE recipes
-(
-    recipe_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recipe_name VARCHAR(30) NOT NULL UNIQUE
-);
-
 -- Связь рецептов и ингредиентов
 CREATE TABLE recipe_ingredients
 (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recipe_id          UUID NOT NULL REFERENCES recipes (recipe_id) ON DELETE CASCADE,
-    ingredient_id      UUID NOT NULL REFERENCES ingredients (ingredient_id),
+    recipe_id          UUID NOT NULL REFERENCES recipes (recipe_id) ON DELETE RESTRICT,
+    ingredient_id      UUID NOT NULL REFERENCES ingredients (ingredient_id) ON DELETE RESTRICT,
     quantity_on_recipe INT  NOT NULL CHECK (quantity_on_recipe > 0),
     UNIQUE (recipe_id, ingredient_id)
 );
@@ -29,7 +29,7 @@ CREATE TABLE drinks
 (
     drink_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     drink_name   VARCHAR(30) NOT NULL UNIQUE,
-    recipe_id    UUID        NOT NULL REFERENCES recipes (recipe_id) ON DELETE CASCADE,
+    recipe_id    UUID        NOT NULL REFERENCES recipes (recipe_id) ON DELETE RESTRICT,
     orders_count INT              DEFAULT 0 CHECK (orders_count >= 0)
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE drinks
 CREATE TABLE orders
 (
     order_id   UUID,
-    drink_id   UUID        NOT NULL REFERENCES drinks (drink_id),
+    drink_id   UUID        NOT NULL REFERENCES drinks (drink_id) ON DELETE RESTRICT,
     status     VARCHAR(20) NOT NULL,
     created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (order_id, created_at)
